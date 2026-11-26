@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Leonida AI SQLite backup
+
+[Timer]
+OnCalendar=*-*-* 04:10:00 Asia/Colombo
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

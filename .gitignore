@@ -1,0 +1,23 @@
+# Local runtime state and secrets
+__pycache__/
+*.py[cod]
+.verify/
+.env
+.env.*
+*.sqlite3
+*.sqlite3-*
+psn-tokens.json
+psn-bootstrap
+http-password
+backups/
+
+# Dependencies
+node_modules/
+
+# Generated QA artifacts and large media
+qa/
+qa-*/
+tiles/
+licensed-media/
+*.mp4
+*.log

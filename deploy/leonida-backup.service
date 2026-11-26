@@ -1,0 +1,20 @@
+[Unit]
+Description=Back up Leonida AI SQLite state
+ConditionPathExists=/var/lib/leonida/progress.sqlite3
+
+[Service]
+Type=oneshot
+User=leonida
+Group=leonida
+StateDirectory=leonida
+StateDirectoryMode=0700
+WorkingDirectory=/opt/leonida/v05
+UMask=0077
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /opt/leonida/v05/app.py --db /var/lib/leonida/progress.sqlite3 --backup /var/lib/leonida/backups
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+CPUQuota=20%
+MemoryMax=96M

@@ -1,0 +1,25 @@
+{
+  "missions": [
+    {"id": "gone-fishing", "name": "Gone Fishing", "chapter": 1},
+    {"id": "gear-up", "name": "Gear Up", "chapter": 1, "aliases": ["Pick Up Another Gun"], "requires": ["gone-fishing"]},
+    {"id": "unwanted-attention", "name": "Unwanted Attention", "chapter": 1, "requires": ["gone-fishing"]},
+    {"id": "pipework", "name": "Pipework", "chapter": 1, "aliases": ["Collect Mandy's Rent"], "requires": ["gear-up", "unwanted-attention"]},
+    {"id": "hey-arnold", "name": "Hey Arnold!", "chapter": 1, "aliases": ["Meet Brian"], "requires": ["pipework"]},
+    {"id": "island-dreams", "name": "Island Dreams", "chapter": 1, "aliases": ["Work for Kenton", "Island Dreams (Work for Kenton)"], "requires": ["hey-arnold"]},
+    {"id": "coming-home", "name": "Coming Home", "chapter": 1, "requires": ["island-dreams"]},
+    {"id": "down-to-earth", "name": "Down to Earth", "chapter": 1},
+    {"id": "don-gone", "name": "Don Gone", "chapter": 1, "requires": ["down-to-earth"]},
+    {"id": "recalibration", "name": "Recalibration", "chapter": 1, "requires": ["don-gone", "island-dreams", "gear-up"]},
+    {"id": "tourist-trap", "name": "Tourist Trap", "chapter": 1, "aliases": ["Take Up Mattia's Offer"], "requires": ["recalibration"]},
+    {"id": "discharge-time", "name": "Discharge Time", "chapter": 1, "requires": ["tourist-trap"]},
+    {"id": "arrived-starlet", "name": "Reached Starlet Motel", "chapter": 2, "aliases": ["Starlet Motel"], "requires": ["discharge-time"]},
+    {"id": "whats-in-the-bag", "name": "What's in the Bag?", "chapter": 2, "requires": ["arrived-starlet"]},
+    {"id": "overnight-charges", "name": "Overnight Charges", "chapter": 2, "aliases": ["See Linda, The Manager"], "requires": ["whats-in-the-bag"]},
+    {"id": "just-moved-in", "name": "Just Moved In", "chapter": 2, "requires": ["whats-in-the-bag"]},
+    {"id": "girls-trip", "name": "Girl's Trip", "chapter": 2, "requires": ["overnight-charges", "just-moved-in"]},
+    {"id": "pick-up-a-gun", "name": "Pick Up a Gun", "chapter": 2, "requires": ["girls-trip"]},
+    {"id": "slam-dunk", "name": "Slam Dunk", "chapter": 2, "requires": ["girls-trip"]},
+    {"id": "coffee-break", "name": "Coffee Break", "chapter": 2, "requires": ["whats-in-the-bag"]}
+  ],
+  "source": "https://www.powerpyx.com/gta-6-full-walkthrough-all-missions/"
+}

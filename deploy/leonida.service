@@ -1,0 +1,37 @@
+[Unit]
+Description=Leonida AI private interactive map
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=leonida
+Group=leonida
+WorkingDirectory=/opt/leonida/v05
+StateDirectory=leonida
+StateDirectoryMode=0700
+LoadCredential=http-password:/etc/leonida/http-password
+UMask=0077
+Environment=PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /opt/leonida/v05/app.py --data /opt/leonida/data --tiles /opt/leonida/tiles --db /var/lib/leonida/progress.sqlite3 --port 8766 --node /opt/leonida/v05/node_modules/node-linux-arm64/bin/node
+Restart=on-failure
+RestartSec=5s
+CPUQuota=45%
+MemoryHigh=180M
+MemoryMax=256M
+TasksMax=96
+TimeoutStopSec=15s
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

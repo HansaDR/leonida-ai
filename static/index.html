@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#14151f">
+  <title>Leonida AI · Interactive map</title>
+  <link rel="stylesheet" href="/vendor/leaflet.css">
+  <link rel="stylesheet" href="/vendor/cluster.css">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/vendor/leaflet.js" defer></script>
+  <script src="/vendor/cluster.js" defer></script>
+  <script src="/icons.js" defer></script>
+  <script src="/tracker.js" defer></script>
+  <script src="/expedition.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="Leonida AI Home">
+      <span class="brand-mark" aria-hidden="true">L<span></span></span>
+      <span><strong>LEONIDA<span> AI</span></strong><small>Interactive map</small></span>
+    </a>
+    <div class="top-stats">
+      <span id="top-completion">—</span><span class="top-label">Game completion</span>
+      <span class="divider"></span><span id="top-trophies">—</span><span class="top-label">Trophies</span>
+    </div>
+    <div class="header-actions">
+      <span class="strict-label"><i></i> <span id="mode-label">Full map</span></span>
+      <button type="button" id="sync" class="primary">Sync now</button>
+    </div>
+  </header>
+  <main id="workspace" class="workspace">
+    <aside id="sidebar" aria-label="Map and progress controls">
+      <nav class="tabs" aria-label="Sidebar views">
+        <button type="button" id="filters-tab" aria-pressed="true">Explore</button>
+        <button type="button" id="progress-tab" aria-pressed="false">Progress <span id="badge" hidden></span></button>
+        <button type="button" id="guides-tab" aria-pressed="false">Guides</button>
+        <button type="button" id="collapse" aria-label="Close sidebar">×</button>
+      </nav>
+      <section id="filters" class="panel">
+        <div class="section-head"><h1>Map filters</h1><output id="count" aria-live="polite"></output></div>
+        <label><input type="checkbox" id="full-map" checked> Show all mapped locations</label>
+        <div class="search-wrap">
+          <label class="sr-only" for="search">Search locations, activities and districts</label>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5"/></svg>
+          <input type="search" id="search" placeholder="Search places, activities, districts" autocomplete="off">
+        </div>
+        <div id="results" class="results" hidden></div>
+        <details id="nearby" class="nearby-box" open hidden>
+          <summary>Nearby finds</summary>
+          <div id="nearby-list"></div>
+        </details>
+        <details id="spoiler-controls" class="spoiler">
+          <summary>Temporarily reveal categories</summary>
+          <p>Locations matched to your story progress appear automatically. Only reveal a category if you're okay seeing locations with unknown unlock requirements.</p>
+          <label class="sr-only" for="reveal-category">Category to reveal</label>
+          <select id="reveal-category"><option value="">Choose a category</option></select>
+          <div id="revealed" class="chips"></div>
+        </details>
+        <details id="story-controls" class="story-controls" open>
+          <summary>Mission progress</summary>
+          <p id="story-checkpoint" class="muted"></p>
+          <details id="completed-missions" hidden><summary>Completed story missions</summary><ul></ul></details>
+          <form id="story-form">
+            <label for="mission-name">Completed mission or save checkpoint</label>
+            <input id="mission-name" type="text" maxlength="100" autocomplete="off" required>
+            <button type="submit">Update</button>
+            <button type="button" id="use-psn" hidden>Use PSN chapter</button>
+          </form>
+          <label id="kenton-label" for="kenton-stage" hidden>Kenton’s active treasure assignments
+            <select id="kenton-stage">
+              <option value="0">None confirmed</option>
+              <option value="1">Kenton sent the initial wrecks</option>
+              <option value="2">Kenton sent the follow-up wrecks</option>
+            </select>
+          </label>
+        </details>
+        <div class="filter-actions">
+          <button id="select-all" type="button">Select all</button>
+          <button id="hide-all" type="button">Hide all</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <div class="toggles">
+          <label><input id="hide-completed" type="checkbox"> Hide completed</label>
+          <label><input id="only-favorites" type="checkbox"> Favorites only</label>
+        </div>
+        <div id="groups"></div>
+      </section>
+      <section id="guides" class="panel" hidden aria-labelledby="guides-title">
+        <div class="section-head"><h1 id="guides-title">Mission guides</h1></div>
+        <label class="sr-only" for="guide-search">Search story and side missions</label>
+        <input id="guide-search" type="text" maxlength="100" placeholder="Search a mission or side mission" autocomplete="off">
+        <div id="guide-results" aria-live="polite"></div>
+      </section>
+      <section id="progress" class="panel" hidden aria-labelledby="progress-title">
+        <div class="section-head"><h1 id="progress-title">Your progress</h1></div>
+        <div class="progress-summary" id="summary"></div>
+        <div class="sync-status" id="sync-status"></div>
+        <label class="auto-option"><input id="auto-sync" type="checkbox" disabled> Sync every 30 minutes</label>
+        <section id="pending-section" hidden><h2>Confirm locations</h2><div id="pending"></div></section>
+        <details open><summary>Activity and collectible objectives</summary><div id="objectives"></div></details>
+        <details><summary>Recent progress</summary><div id="history"></div></details>
+        <details><summary>Earned trophies</summary><div id="trophies"></div></details>
+      </section>
+    </aside>
+    <section id="map-panel" aria-label="Interactive map of Leonida">
+      <div id="map"></div>
+      <div class="map-tools">
+        <button id="open-filters" type="button" aria-label="Open map filters">Filters</button>
+        <button id="open-progress" type="button" aria-label="Open progress dashboard">Progress</button>
+        <button id="player-location" type="button">My location</button>
+        <button id="add-waypoint" type="button" aria-pressed="false" aria-label="Add a waypoint">＋ <span>Waypoint</span></button>
+        <button id="fullscreen" type="button" aria-pressed="false" aria-label="Fullscreen map">⛶</button>
+      </div>
+      <div class="map-bottom">
+        <details class="legend"><summary>Legend</summary>
+          <ul>
+            <li><span class="legend-dot"></span> Available</li>
+            <li><span class="legend-dot unknown"></span> Availability unknown</li>
+            <li><span class="legend-dot manual">✓</span> Completed manually</li>
+            <li><span class="legend-dot automatic">✓</span> Verified completion</li>
+            <li><span class="legend-dot pending">?</span> Location unconfirmed</li>
+            <li><span class="legend-dot locked">◇</span> Locked at current progress</li>
+            <li><span class="legend-dot locked">–</span> Chapter window closed</li>
+            <li><span class="legend-dot waypoint">＋</span> Waypoint</li>
+          </ul>
+        </details>
+        <button id="recenter" type="button" aria-label="Recenter map">Recenter</button>
+        <button id="toggle-fog" type="button" aria-pressed="true">Fog</button>
+      </div>
+      <div id="position-step" hidden><span id="position-instruction"></span><button id="cancel-position" type="button">Cancel</button></div>
+      <div id="tracking-status" role="status" hidden>
+        <span id="tracking-text">Tracking live position</span>
+        <button id="stop-tracking" type="button">Stop</button>
+      </div>
+      <aside id="detail" aria-label="Location details" hidden>
+        <button id="close-detail" type="button" aria-label="Close location details">×</button>
+        <div id="detail-content"></div>
+      </aside>
+    </section>
+  </main>
+  <dialog id="waypoint-dialog">
+    <form id="waypoint-form">
+      <h2>Add waypoint</h2>
+      <label for="waypoint-name">Name</label>
+      <input id="waypoint-name" type="text" maxlength="70" required autocomplete="off">
+      <div class="dialog-actions"><button id="cancel-waypoint" type="button">Cancel</button><button type="submit" class="primary">Save</button></div>
+    </form>
+  </dialog>
+  <dialog id="position-dialog">
+    <h2>My location</h2>
+    <p id="last-position" class="muted"></p>
+    <div class="detail-actions">
+      <button id="pick-position" type="button">Pick on Leonida map</button>
+      <button id="upload-position" type="button">Open map screenshot</button>
+      <button id="capture-position" type="button" hidden>Capture one frame</button>
+      <button id="track-position" type="button" hidden>Track live position</button>
+      <input id="position-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+    </div>
+    <p id="screenshot-instructions" aria-live="polite" hidden></p>
+    <p id="tracking-help" class="muted" hidden>Keep the in-game map still. Tracking reads only the player arrow and never uploads video.</p>
+    <canvas id="position-screenshot" aria-label="Screenshot for selecting player arrow and landmarks" hidden></canvas>
+    <div class="dialog-actions">
+      <button id="center-position" type="button" hidden>Center map</button>
+      <button id="clear-position" type="button" hidden>Clear saved locations</button>
+      <button id="close-position" type="button">Close</button>
+    </div>
+  </dialog>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

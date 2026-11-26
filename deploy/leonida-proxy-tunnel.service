@@ -1,0 +1,19 @@
+[Unit]
+Description=Private Leonida AI upstream via Sydney Tailscale SSH
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+User=leonida-tunnel
+Group=leonida-tunnel
+ExecStart=/usr/bin/ssh -F /dev/null -NT -o BatchMode=yes -o ExitOnForwardFailure=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/leonida-tunnel/known_hosts -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -i /etc/leonida-tunnel/upstream_key -L 127.0.0.1:18766:127.0.0.1:8766 leonida-forward@100.110.4.76
+Restart=on-failure
+RestartSec=10s
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+MemoryMax=32M
+
+[Install]
+WantedBy=multi-user.target
